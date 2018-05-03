@@ -1,0 +1,12 @@
+target/
+/project/*/
+/.idea/
+
+/secrets/
+
+# npm loadtest
+#/node_modules/
+#/package-lock.json
+
+# macOS: Every Mac developer should have this on system-wide gitignore (not needed here)
+#.DS_Store
