@@ -1,27 +1,27 @@
 package sandbox
 
-//import akka.NotUsed
+import akka.NotUsed
 import akka.actor.ActorSystem
 import akka.http.scaladsl.Http
-import akka.http.scaladsl.common.{EntityStreamingSupport, JsonEntityStreamingSupport}
 import akka.http.scaladsl.model.{HttpRequest, HttpResponse}
 import akka.http.scaladsl.unmarshalling._
+import akka.http.scaladsl.common.{EntityStreamingSupport, JsonEntityStreamingSupport}
 import akka.stream.{ActorMaterializer, Materializer}
 import akka.stream.scaladsl.{Flow, Source}
 import akka.util.ByteString
 import com.typesafe.scalalogging.LazyLogging
 import io.circe.{Decoder, Json, jawn}
-//import io.circe.parser.{parse => parseJson}
+import io.circe.parser.{parse => parseJson}
 
 import scala.concurrent.Future
 import scala.concurrent.duration._
 import scala.util.{Failure, Success}
 
-// Note: Currently (akka-http-circe 1.20.1), 'FailFastCirceSupport' isn't relevant for the code.
+// Note: For option '[B]', akka-http-circe (1.20.1) is not required. Having it enabled so we see if it affects '[A]'.
 //
-//import de.heikoseeberger.akkahttpcirce.FailFastCirceSupport
+import de.heikoseeberger.akkahttpcirce.FailFastCirceSupport
 
-object TestRunSink extends /*FailFastCirceSupport with*/ LazyLogging {
+object TestRunSink extends FailFastCirceSupport with LazyLogging {
 
   def main(args: Array[String]): Unit = {
     val port: Int = 8083    // (in real app, this would come from config)
@@ -35,15 +35,14 @@ object TestRunSink extends /*FailFastCirceSupport with*/ LazyLogging {
 
         // Based on -> https://doc.akka.io/docs/akka-http/current/common/json-support.html#consuming-json-streaming-style-apis
         //
-        val src: Source[Data, _ /*Future[NotUsed]*/] = {
+        val src: Source[Data,_] = {
 
-          if (false) {    // did not compile
-            /*** disabled
-            val unmarshalled: Future[Source[Data,NotUsed]] = Unmarshal(resp).to[Source[Data,NotUsed]]
-            Source.fromFutureSource(unmarshalled)
-            ***/
+          if (false) {    // [A]: does not compile
+            //val tmp: Future[Source[Data,NotUsed]] = Unmarshal(resp).to[Source[Data,NotUsed]]
+            //Source.fromFutureSource(tmp)
             ???
-          } else {    // same, more explicitly
+
+          } else {    // [B]: same, more explicitly
             resp.entity.dataBytes
               .via(jsonStreamingSupport.framingDecoder)
               .mapAsync(1){ bytes: ByteString => Unmarshal(bytes).to[Data] }
@@ -86,8 +85,10 @@ object TestRunSink extends /*FailFastCirceSupport with*/ LazyLogging {
 
   /*
   * Better? Modeled with ideas from 'akka-http-circe'
+  *
+  * Note: This is enough for '[B]' option
   */
-  implicit def unmarshaller[T: Decoder]: Unmarshaller[ByteString,T] = {
+  implicit def tUnmarshaller[T: Decoder]: Unmarshaller[ByteString,T] = {
     def decode(json: Json) = Decoder[T].decodeJson(json).fold(throw _, identity)
     jsonUnmarshaller.map(decode)
   }
@@ -99,6 +100,13 @@ object TestRunSink extends /*FailFastCirceSupport with*/ LazyLogging {
       case data             => jawn.parseByteBuffer(data.asByteBuffer).fold(throw _, identity)
     }
   }
+
+  /*
+  * Needed for '[A]' option
+  */
+  //implicit def respUnmarshaller[T: Decoder]: FromResponseUnmarshaller[Source[T,NotUsed]] = {
+  //  ???
+  //}
 
   // Note: 'implicit' needed only if we use the 'Unmarshal(resp)' approach
   //
