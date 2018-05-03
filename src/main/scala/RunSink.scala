@@ -1,6 +1,5 @@
 package sandbox
 
-import akka.NotUsed
 import akka.actor.ActorSystem
 import akka.http.scaladsl.Http
 import akka.http.scaladsl.common.{EntityStreamingSupport, JsonEntityStreamingSupport}
@@ -10,20 +9,21 @@ import akka.stream.{ActorMaterializer, Materializer}
 import akka.stream.scaladsl.{Flow, Source}
 import akka.util.ByteString
 import com.typesafe.scalalogging.LazyLogging
-import de.heikoseeberger.akkahttpcirce.FailFastCirceSupport
+//import de.heikoseeberger.akkahttpcirce.FailFastCirceSupport
+import io.circe.{Decoder, Json}
 
 import scala.concurrent.Future
 import scala.concurrent.duration._
 import scala.util.{Failure, Success}
 
-object TestRunSink extends FailFastCirceSupport with LazyLogging {
+object TestRunSink extends /*FailFastCirceSupport with*/ LazyLogging {
 
   // Due to:
   //  <<
   //    Error:(48, 54) could not find implicit value for parameter um: akka.http.scaladsl.unmarshalling.Unmarshaller[akka.util.ByteString,test.run.Data]
   //  <<
   //
-  val evidence: Unmarshaller[ByteString,String] = implicitly[Unmarshaller[ByteString,String]]
+  //val evidence: Unmarshaller[ByteString,String] = implicitly[Unmarshaller[ByteString,String]]
 
   def main(args: Array[String]): Unit = {
     val port: Int = 8083    // (in real app, this would come from config)
@@ -62,6 +62,14 @@ object TestRunSink extends FailFastCirceSupport with LazyLogging {
       case Failure(th) =>
         logger.error(s"Request failed: ${th.getMessage}")
     }
+  }
+
+  // Note: 'akka-http-circe' only provides unmarshalling from an 'HttpEntity', not from a 'ByteString' (which is
+  //    required by the streaming unmarshalling.
+  //
+  implicit def unmarshaller[T](implicit decoder: Decoder[T]): Unmarshaller[ByteString,T] = {
+
+    ???
   }
 
   /*implicit*/ val jsonStreamingSupport: JsonEntityStreamingSupport = {

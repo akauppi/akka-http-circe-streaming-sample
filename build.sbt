@@ -40,11 +40,11 @@ val akkaHttp = "com.typesafe.akka" %% "akka-http" % akkaHttpVer
 val akkaHttpTestkit = "com.typesafe.akka" %% "akka-http-testkit" % akkaHttpVer % Test
 
 val circeVersion = "0.9.3"
-val circeCore = "io.circe" %% "circe-core" % circeVersion
+//val circeCore = "io.circe" %% "circe-core" % circeVersion
 val circeGeneric = "io.circe" %% "circe-generic" % circeVersion
 val circeParser = "io.circe" %% "circe-parser" % circeVersion
-val circeJava8 = "io.circe" %% "circe-java8" % circeVersion
-val circeLiteral = "io.circe" %% "circe-literal" % circeVersion
+//val circeJava8 = "io.circe" %% "circe-java8" % circeVersion
+//val circeLiteral = "io.circe" %% "circe-literal" % circeVersion
 
 val akkaHttpCirce = "de.heikoseeberger" %% "akka-http-circe" % "1.20.1"
 
@@ -58,8 +58,10 @@ val bridge = (project in file(".")).settings(defaults, commonDeps)
   .settings(
     libraryDependencies ++= Seq(
       circeGeneric,
+      circeParser,
       akkaStream,
       akkaHttp,
+      // tbd. check if akka-http-circe is even required
       akkaHttpCirce,
       //
       scalaTest,

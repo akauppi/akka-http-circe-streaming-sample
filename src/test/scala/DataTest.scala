@@ -3,7 +3,7 @@ package test
 import io.circe.Json
 import io.circe.syntax._
 import org.scalatest.{EitherValues, FlatSpec, Matchers}
-import test.run._
+import sandbox.Data
 
 class DataTest extends FlatSpec with Matchers with EitherValues {
 

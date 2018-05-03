@@ -4,4 +4,3 @@
 
   - do we get client side running with Circe?
 
-  
