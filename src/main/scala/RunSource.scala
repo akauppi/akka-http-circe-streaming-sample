@@ -42,7 +42,7 @@ object TestRunSource extends FailFastCirceSupport with LazyLogging {
   private
   val src: Source[Data,_] = Source(1 to Int.MaxValue)
     .map(Data(_))
-    .throttle(100, 1 second)
+    .throttle(500, 1 second)
     .map{ x => println(x); x }
 
   private

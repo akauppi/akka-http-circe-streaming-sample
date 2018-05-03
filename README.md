@@ -26,11 +26,49 @@ Tests should pass, or be ignored.
 
 ### Manual testing
 
+You'll need multiple terminal windows. In the first one, let's start a server:
+
 ```
-$ sbt test:run
+$ sbt run
+[2] sandbox.TestRunSource
+...
+... Service running at http://localhost:8083
 ```
 
-Open http://localhost:8083 and there should be a 1.. stream of JSON objects
+Open http://localhost:8083/data and there should be a 1.. stream of JSON objects.
+
+You can also see the server logging the data it has pushed.
+
+Now, let's open a client (in another terminal):
+
+```
+$ sbt run 
+ [1] sandbox.TestRunSink
+...
+Data(1)
+Data(2)
+Data(3)
+Data(4)
+Data(5)
+Data(6)
+Data(7)
+Data(8)
+Data(9)
+Data(10)
+... 
+```
+
+You can open multiple clients in different terminals. 
+
+#### Back pressure
+
+Have a look at the server side to see how the back pressure works.
+
+First, stop any consumption by ctrl-s.
+
+If the client has shown e.g. 50 values, the server still goes on creating more (up to ~ 6000..7000), but stops there (buffers full, no back pressure).
+
+Press ctrl-q on the client, to let it cause demand. The server should start creating more values, again, always trying to keep ahead of the consumption (with me, the second stop happened at 12899).
 
 
 ## References
